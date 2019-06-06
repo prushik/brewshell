@@ -1,0 +1,4 @@
+brewshell
+a.out
+src/*.o
+*.o
