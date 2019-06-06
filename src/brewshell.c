@@ -6,9 +6,12 @@
 #include "mash.h"
 #include "srm.h"
 #include "yeast.h"
+
 #include <sqlite3.h>
+
 #include <readline/readline.h>
 #include <readline/history.h>
+
 #define str(x) x,(sizeof(x)-1)
 
 static struct recipe beer = {0};
@@ -45,7 +48,14 @@ void recipe_update(unsigned long int beer_id, const char* name, double size);
 
 int main(int argc, char **argv)
 {
+	int i;
 	char* buf;
+
+	for (i = 1; i < argc; i++)
+	{
+		
+	}
+
 	while ((buf = readline(">> ")) != 0)
 	{
 		if (strlen(buf) > 0)
