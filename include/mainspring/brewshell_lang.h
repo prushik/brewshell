@@ -1,18 +1,4 @@
-
-#define KEY_DECL_SECTION 11
-#define KEY_DECL_PRESERVE 14
-#define KEY_DECL_PROTOTYPE 15
-#define KEY_SECTION_TEXT 20
-#define KEY_SECTION_DATA 21
-#define KEY_SECTION_RODATA 22
-#define KEY_SECTION_BSS 23
-#define KEY_SIZE_BYTE 24
-#define KEY_SIZE_WORD 25
-#define KEY_SIZE_DWORD 26
-#define KEY_SIZE_QWORD 27
-#define KEY_REG_RANGE_BEGIN 28
-#define KEY_REG_RANGE_END 43
-#define RESERVED_KEYWORDS 44
+#define RESERVED_KEYWORDS 8
 extern const char *reserved[];
 
 #define OP_ADD 0
@@ -22,24 +8,9 @@ extern const char *reserved[];
 #define OP_MOD 4
 #define OP_LSFT 5
 #define OP_RSFT 6
-#define OP_SET 7
-#define OP_EQU 8
-#define OP_NEQ 9
-#define OP_AND 10
-#define OP_OR 11
-#define OP_LAND 12
-#define OP_LOR 13
-#define OP_LNO 14
-#define OP_XOR 15
-#define OP_NOT 16
-#define OP_GT 17
-#define OP_LT 18
-#define OP_COM 19
-#define OP_DOT 20
-#define OP_INC 21
-#define OP_DEC 22
+#define OP_DOT 7
 
-#define OPERATORS 23
+#define OPERATORS 8
 extern const char *operator[];
 
 #define PUNC_INVD -1
@@ -69,6 +40,6 @@ extern const char *char_ini[];
 extern const char *char_set[];
 extern const char *char_end[];
 
-#define COMMENTS 3
+#define COMMENTS 4
 extern const char *comment_ini[];
 extern const char *comment_end[];

@@ -7,10 +7,11 @@
 #include "srm.h"
 #include "yeast.h"
 
-#include <sqlite3.h>
+#include "linenoise.h"
 
-#include <readline/readline.h>
-#include <readline/history.h>
+#include "mainspring/brewshell_lang.h"
+
+#include <sqlite3.h>
 
 #define str(x) x,(sizeof(x)-1)
 
@@ -46,6 +47,9 @@ void recipe_update(unsigned long int beer_id, const char* name, double size);
 #define ACTION_EDITBEER		0x0f
 #define ACTION_UPDATEBEER	0x10
 
+void linenoise_complete(const char *text, linenoiseCompletions *lc);
+char *linenoise_hint(const char *buf, int *color, int *bold);
+
 int main(int argc, char **argv)
 {
 	int i;
@@ -56,11 +60,16 @@ int main(int argc, char **argv)
 		
 	}
 
-	while ((buf = readline(">> ")) != 0)
+	/* Set the completion callback. This will be called every time the
+	 * user uses the <tab> key. */
+	linenoiseSetCompletionCallback(linenoise_complete);
+	linenoiseSetHintsCallback(linenoise_hint);
+
+	while ((buf = linenoise(">> ")) != 0)
 	{
 		if (strlen(buf) > 0)
 		{
-			add_history(buf);
+			linenoiseHistoryAdd(buf);
 		}
 
 		printf("[%s]\n", buf);
@@ -69,6 +78,29 @@ int main(int argc, char **argv)
 		free(buf);
 	}
 
+}
+
+void linenoise_complete(const char *text, linenoiseCompletions *lc)
+{
+	int i;
+
+	for (i = 0; i < RESERVED_KEYWORDS; i++)
+	{
+		linenoiseAddCompletion(lc, reserved[i]);
+	}
+
+	return;
+}
+
+char *linenoise_hint(const char *buf, int *color, int *bold)
+{
+	if (!strcasecmp(buf,"hello"))
+	{
+		*color = 35;
+		*bold = 0;
+		return " World";
+	}
+	return 0;
 }
 
 int web_main(int argc, char **argv)
