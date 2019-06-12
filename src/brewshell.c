@@ -8,8 +8,13 @@
 #include "yeast.h"
 
 #include "linenoise.h"
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "mainspring/brewshell_lang.h"
+#include "mainspring/host_config.h"
+#include "mainspring/lang_config.h"
+#include "mainspring/tokenizer.h"
 
 #include <sqlite3.h>
 
@@ -72,6 +77,8 @@ int main(int argc, char **argv)
 			linenoiseHistoryAdd(buf);
 		}
 
+		parse_command(buf);
+
 		printf("[%s]\n", buf);
 
 		// readline malloc's a new buffer every time.
@@ -101,6 +108,59 @@ char *linenoise_hint(const char *buf, int *color, int *bold)
 		return " World";
 	}
 	return 0;
+}
+
+int parse_command(const char *text)
+{
+	int len, i, j;
+	struct token *tokens;
+
+	len=strlen(text)-1;
+	if (!len)
+		return 0;
+	tokens = malloc(sizeof(struct token) * (count_tokens(text,len)+1));
+	len = tokenize(text, len, tokens);
+
+	// convert builtins to symbolic names
+	for (i=0; i<len+1; i++)
+	{
+		if (tokens[i].type == CHAR_TYPE_SYM)
+		{
+			for (j=0;j<RESERVED_KEYWORDS; j++)
+			{
+				tokens[i].sym = -1;
+				if (strncmp(tokens[i].text, reserved[j], tokens[i].text_len) == 0)
+				{
+					tokens[i].sym = j;
+				}
+			}
+		}
+	}
+
+	for (i=0; i<len+1; i++)
+	{
+		if (tokens[i].type == CHAR_TYPE_WHT || tokens[i].type == CHAR_TYPE_COM)
+			continue;
+
+		if (tokens[i].type == CHAR_TYPE_SYM)
+		{
+			if (tokens[i].sym == ("CREATE",1))
+			{
+				printf("CREATING NEW FILE!!!\n");
+//				parse_create();
+			}
+			else
+			{
+				printf("%ld\n", tokens[i].sym);
+			}
+		}
+		else
+		{
+			printf("type: %d\n",tokens[i].type);
+		}
+	}
+
+	free(tokens);
 }
 
 int web_main(int argc, char **argv)

@@ -1,4 +1,4 @@
-#include "brewshell_lang.h"
+#include "mainspring/brewshell_lang.h"
 
 const char *reserved[RESERVED_KEYWORDS] = {
 	"brew","create","open","save","export","add","rm","print"
