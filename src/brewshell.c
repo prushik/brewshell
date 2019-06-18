@@ -115,8 +115,8 @@ int parse_command(const char *text)
 	int len, i, j;
 	struct token *tokens;
 
-	len=strlen(text)-1;
-	if (!len)
+	len=strlen(text);
+	if (len < 0)
 		return 0;
 	tokens = malloc(sizeof(struct token) * (count_tokens(text,len)+1));
 	len = tokenize(text, len, tokens);
@@ -126,9 +126,9 @@ int parse_command(const char *text)
 	{
 		if (tokens[i].type == CHAR_TYPE_SYM)
 		{
+			tokens[i].sym = -1;
 			for (j=0;j<RESERVED_KEYWORDS; j++)
 			{
-				tokens[i].sym = -1;
 				if (strncmp(tokens[i].text, reserved[j], tokens[i].text_len) == 0)
 				{
 					tokens[i].sym = j;
