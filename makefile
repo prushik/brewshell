@@ -1,4 +1,4 @@
-COMMON_SRC = src/recipe.c src/mash.c src/ibu.c src/yeast.c src/srm.c src/linenoise.c
+COMMON_SRC = src/recipe.c src/mash.c src/ibu.c src/yeast.c src/srm.c src/beer.c src/linenoise.c
 MAINSPRING_SRC = src/tokenizer.c src/langs/brewshell.c
 DEBUG ?= -DDEBUG -g -Og
 CFLAGS ?= -Wno-implicit-function-declaration -Wno-unused-result -I./include -I./include/mainspring

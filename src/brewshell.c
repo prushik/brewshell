@@ -7,6 +7,8 @@
 #include "srm.h"
 #include "yeast.h"
 
+#include "constants.h"
+
 #include "linenoise.h"
 #include <stdlib.h>
 #include <string.h>
@@ -110,6 +112,22 @@ char *linenoise_hint(const char *buf, int *color, int *bold)
 	return 0;
 }
 
+void parse_set(struct token *tokens, int len, int current)
+{
+	int i;
+
+	for (i=current; i<len; i++)
+	{
+		if (tokens[i].type == CHAR_TYPE_WHT || tokens[i].type == CHAR_TYPE_COM)
+			continue;
+
+		if (tokens[i].type == CHAR_TYPE_STR)
+		{
+			beer_set_string(BEER_PARAM_NAME, &tokens[i].text[1], tokens[i].text_len-2);
+		}
+	}
+}
+
 int parse_command(const char *text)
 {
 	int len, i, j;
@@ -144,14 +162,19 @@ int parse_command(const char *text)
 
 		if (tokens[i].type == CHAR_TYPE_SYM)
 		{
-			if (tokens[i].sym == ("CREATE",1))
+			switch (tokens[i].sym)
 			{
-				printf("CREATING NEW FILE!!!\n");
-//				parse_create();
-			}
-			else
-			{
-				printf("%ld\n", tokens[i].sym);
+				case 6:
+					printf("beer:\n");
+					beer_print_recipe();
+					break;
+				case 7:
+					printf("setting a parameter\n");
+					parse_set(tokens, len+1, i);
+					break;
+				default:
+					printf("unknown action: %ld\n", tokens[i].sym);
+					break;
 			}
 		}
 		else

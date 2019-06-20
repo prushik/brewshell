@@ -1,0 +1,13 @@
+#define BEER_PARAM_NAME   0
+#define BEER_PARAM_AUTHOR 1
+#define BEER_PARAM_VOLUME 2
+#define BEER_PARAM_BG     3
+#define BEER_PARAM_OG     4
+#define BEER_PARAM_FG     5
+#define BEER_PARAM_IBU    6
+#define BEER_PARAM_EFFICIENCY 7
+#define BEER_PARAM_SRM    8
+#define BEER_PARAM_ABV    9
+#define BEER_PARAM_HOPS   10
+#define BEER_PARAM_MALTS  11
+#define BEER_PARAM_YEASTS 12

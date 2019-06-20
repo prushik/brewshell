@@ -28,7 +28,7 @@ struct yeast
 struct recipe
 {
 	char name[32];       		// beer name
-	char author[32];       		// beer maker's name
+	char author[32];     		// beer maker's name
 	double vol;          		// volume (gallons)
 	double bg,og,fg;     		// gravity
 	double ibu;          		// bitterness
