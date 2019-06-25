@@ -95,7 +95,9 @@ void linenoise_complete(const char *text, linenoiseCompletions *lc)
 
 	for (i = 0; i < RESERVED_KEYWORDS; i++)
 	{
-		linenoiseAddCompletion(lc, reserved[i]);
+		if (strncmp(text, reserved[i], strlen(text)) == 0) {
+			linenoiseAddCompletion(lc, reserved[i]);
+		}
 	}
 
 	return;
@@ -112,19 +114,71 @@ char *linenoise_hint(const char *buf, int *color, int *bold)
 	return 0;
 }
 
+static inline int ignorable(int type)
+{
+	if (type == CHAR_TYPE_COM || type == CHAR_TYPE_WHT)
+		return 1;
+	else
+		return 0;
+}
+
+void parse_set_string_parameter(struct token *tokens, int len, int current)
+{
+	int i;
+
+	for (i=current; i<len; i++)
+	{
+		if (ignorable(tokens[i].type))
+			continue;
+
+		if (tokens[i].type == CHAR_TYPE_SYM)
+		{
+			switch (tokens[i].sym)
+			{
+				case KEY_PARAM_NAME:
+					for (; i<len; i++)
+					{
+						if (tokens[i].type == CHAR_TYPE_STR)
+						{
+							beer_set_string(KEY_PARAM_NAME, &tokens[i].text[1], tokens[i].text_len-2);
+							break;
+						}
+					}
+					break;
+				case KEY_PARAM_AUTHOR:
+					for (; i<len; i++)
+					{
+						if (tokens[i].type == CHAR_TYPE_STR)
+						{
+							beer_set_string(KEY_PARAM_AUTHOR, &tokens[i].text[1], tokens[i].text_len-2);
+							break;
+						}
+					}
+					break;
+			}
+		}
+	}
+}
+
 void parse_set(struct token *tokens, int len, int current)
 {
 	int i;
 
 	for (i=current; i<len; i++)
 	{
-		if (tokens[i].type == CHAR_TYPE_WHT || tokens[i].type == CHAR_TYPE_COM)
+		if (ignorable(tokens[i].type))
 			continue;
 
-		if (tokens[i].type == CHAR_TYPE_STR)
+		if (tokens[i].type == CHAR_TYPE_SYM)
 		{
-			beer_set_string(BEER_PARAM_NAME, &tokens[i].text[1], tokens[i].text_len-2);
+			if (tokens[i].sym >= KEY_STRING_PARAMETERS_START && tokens[i].sym <= KEY_STRING_PARAMETERS_END)
+				parse_set_string_parameter(tokens, len, i);
+//			if (tokens[i].sym >= KEY_FLOAT_PARAMETERS_START && tokens[i].sym <= KEY_FLOAT_PARAMETERS_END)
+//				parse_set_string_parameter(tokens, len, i);
+//			if (tokens[i].sym >= KEY_FLOAT_PARAMETERS_START && tokens[i].sym <= KEY_FLOAT_PARAMETERS_END)
+//				parse_set_array_parameter(tokens, len, i);
 		}
+
 	}
 }
 
@@ -157,18 +211,18 @@ int parse_command(const char *text)
 
 	for (i=0; i<len+1; i++)
 	{
-		if (tokens[i].type == CHAR_TYPE_WHT || tokens[i].type == CHAR_TYPE_COM)
+		if (ignorable(tokens[i].type))
 			continue;
 
 		if (tokens[i].type == CHAR_TYPE_SYM)
 		{
 			switch (tokens[i].sym)
 			{
-				case 6:
+				case KEY_ACTION_PRINT:
 					printf("beer:\n");
 					beer_print_recipe();
 					break;
-				case 7:
+				case KEY_ACTION_SET:
 					printf("setting a parameter\n");
 					parse_set(tokens, len+1, i);
 					break;

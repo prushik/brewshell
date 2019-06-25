@@ -1,7 +1,10 @@
 #include "mainspring/brewshell_lang.h"
 
 const char *reserved[RESERVED_KEYWORDS] = {
-	"brew","open","save","export","add","rm","print","set"
+	"brew","open","save","export","add","rm","print","set",
+	"quit","scale",
+	"name","author","volume","bg","og","fg","ibu","efficiency",
+	"srm","abv","hops","malts","yeasts","type","quantity","time"
 };
 
 const char *operator[OPERATORS] = {"+","-","*","/","%","<<",">>","."};

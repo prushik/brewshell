@@ -5,6 +5,9 @@
 #include "beer.h"
 #include "constants.h"
 
+#include "mainspring/host_config.h"
+#include "mainspring/lang_config.h"
+
 #define str(x) x,sizeof(x)
 
 static struct recipe beer = {0};
@@ -16,7 +19,14 @@ void beer_init()
 
 void beer_set_float(int parameter, double value)
 {
-	
+	switch (parameter)
+	{
+		case KEY_PARAM_VOLUME:
+			beer.volume=value;
+			break;
+		default:
+			return;
+	}
 }
 
 double beer_get_float(int parameter)
@@ -27,8 +37,21 @@ double beer_get_float(int parameter)
 void beer_set_string(int parameter, const char *value, unsigned int len)
 {
 //	beer.name = realloc(beer.name, len+1);
-	strcpy(beer.name, value);
-	beer.name[len]='\0';
+	if (len>=31)
+		return;
+	switch (parameter)
+	{
+		case KEY_PARAM_NAME:
+			strcpy(beer.name, value);
+			beer.name[len]='\0';
+			break;
+		case KEY_PARAM_AUTHOR:
+			strcpy(beer.author, value);
+			beer.author[len]='\0';
+			break;
+		default:
+			return;
+	}
 }
 
 void beer_print_recipe()
