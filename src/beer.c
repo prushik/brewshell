@@ -22,7 +22,7 @@ void beer_set_float(int parameter, double value)
 	switch (parameter)
 	{
 		case KEY_PARAM_VOLUME:
-			beer.volume=value;
+			beer.vol=value;
 			break;
 		default:
 			return;
@@ -51,6 +51,30 @@ void beer_set_string(int parameter, const char *value, unsigned int len)
 			break;
 		default:
 			return;
+	}
+}
+
+int beer_add_array(int parameter)
+{
+	switch (parameter)
+	{
+		case KEY_PARAM_MALTS:
+			beer.malt_n += 1;
+			beer.malts = realloc(beer.malts, sizeof(struct malt)*beer.malt_n);
+			return beer.malt_n;
+			break;
+		case KEY_PARAM_HOPS:
+			beer.hop_n += 1;
+			beer.hops = realloc(beer.hops, sizeof(struct hop)*beer.hop_n);
+			return beer.hop_n;
+			break;
+		case KEY_PARAM_YEASTS:
+			beer.yeast_n += 1;
+			beer.yeasts = realloc(beer.hops, sizeof(struct yeast)*beer.yeast_n);
+			return beer.yeast_n;
+			break;
+		default:
+			return 0;
 	}
 }
 

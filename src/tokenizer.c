@@ -111,6 +111,7 @@ int tokenize(const char *expr, unsigned int len, struct token *token_array)
 			if (cur_tok == CHAR_TYPE_NUM)
 			{
 				token_array[n_tok].sym = strtol(token_array[n_tok].text, NULL, 0);
+				token_array[n_tok].fsym = strtod(token_array[n_tok].text, NULL);
 			}
 			if (cur_tok == CHAR_TYPE_GRP)
 			{
@@ -148,7 +149,8 @@ int tokenize(const char *expr, unsigned int len, struct token *token_array)
 	// Interpret the token to get it into a more usable form
 	if (cur_tok == CHAR_TYPE_NUM)
 	{
-		token_array[n_tok].sym = strtol(token_array[n_tok].text, NULL,0);
+		token_array[n_tok].sym = strtol(token_array[n_tok].text, NULL, 0);
+		token_array[n_tok].fsym = strtod(token_array[n_tok].text, NULL);
 	}
 	if (cur_tok == CHAR_TYPE_GRP)
 	{

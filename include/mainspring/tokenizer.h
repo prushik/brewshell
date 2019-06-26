@@ -2,16 +2,11 @@ struct token
 {
 	int type;			//type of token
 	int level;			//
-//	int group_id;		//id of current group
-//	int group_parent_id;//id of parent group
-//	int group_depth;	//depth of group nesting
 	long sym;			//symbolic representation of token (machine readable)
+	double fsym;		//floating point symbolic representation
 	int text_len;		//length of token text
 	const char *text;	//pointer to text of token
-//	int argc;			//number of operands
-//	int argv[6];		//token numbers of operands to this token
 	int line;			//line number from original source file
-	long custom_flags;	//reserved for application use
 };
 
 int id_token_str(const char *token);

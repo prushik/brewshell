@@ -122,41 +122,83 @@ static inline int ignorable(int type)
 		return 0;
 }
 
+void parse_error(const char *msg)
+{
+	printf("parse error: %s\n",msg);
+	return;
+}
+
 void parse_set_string_parameter(struct token *tokens, int len, int current)
 {
-	int i;
+	int i, parameter;
+	parameter = tokens[current].sym;
 
-	for (i=current; i<len; i++)
+	for (i=current+1; i<len; i++)
 	{
 		if (ignorable(tokens[i].type))
 			continue;
 
-		if (tokens[i].type == CHAR_TYPE_SYM)
+		if (tokens[i].type == CHAR_TYPE_SPE && tokens[i].sym == PUNC_ASGN)
 		{
-			switch (tokens[i].sym)
+			for (i++; i<len; i++)
 			{
-				case KEY_PARAM_NAME:
-					for (; i<len; i++)
-					{
-						if (tokens[i].type == CHAR_TYPE_STR)
-						{
-							beer_set_string(KEY_PARAM_NAME, &tokens[i].text[1], tokens[i].text_len-2);
-							break;
-						}
-					}
-					break;
-				case KEY_PARAM_AUTHOR:
-					for (; i<len; i++)
-					{
-						if (tokens[i].type == CHAR_TYPE_STR)
-						{
-							beer_set_string(KEY_PARAM_AUTHOR, &tokens[i].text[1], tokens[i].text_len-2);
-							break;
-						}
-					}
-					break;
+				if (ignorable(tokens[i].type))
+					continue;
+
+				if (tokens[i].type == CHAR_TYPE_STR)
+				{
+					beer_set_string(parameter, &tokens[i].text[1], tokens[i].text_len-2);
+					return;
+				}
+				else
+				{
+					parse_error("string expected");
+				}
 			}
 		}
+	}
+}
+
+void parse_set_float_parameter(struct token *tokens, int len, int current)
+{
+	int i, parameter;
+	parameter = tokens[current].sym;
+
+	for (i=current+1; i<len; i++)
+	{
+		if (ignorable(tokens[i].type))
+			continue;
+
+		if (tokens[i].type == CHAR_TYPE_SPE && tokens[i].sym == PUNC_ASGN)
+		{
+			for (i++; i<len; i++)
+			{
+				if (ignorable(tokens[i].type))
+					continue;
+
+				if (tokens[i].type == CHAR_TYPE_NUM)
+				{
+					beer_set_float(parameter, tokens[i].fsym);
+					return;
+				}
+			}
+		}
+	}
+}
+
+void parse_add_array_parameter(struct token *tokens, int len, int current)
+{
+	int i, parameter, index;
+	parameter = tokens[current].sym;
+
+	index = beer_add_array(parameter);
+
+	for (i=current+1; i<len; i++)
+	{
+		if (ignorable(tokens[i].type))
+			continue;
+
+		
 	}
 }
 
@@ -164,7 +206,7 @@ void parse_set(struct token *tokens, int len, int current)
 {
 	int i;
 
-	for (i=current; i<len; i++)
+	for (i=current+1; i<len; i++)
 	{
 		if (ignorable(tokens[i].type))
 			continue;
@@ -173,12 +215,29 @@ void parse_set(struct token *tokens, int len, int current)
 		{
 			if (tokens[i].sym >= KEY_STRING_PARAMETERS_START && tokens[i].sym <= KEY_STRING_PARAMETERS_END)
 				parse_set_string_parameter(tokens, len, i);
-//			if (tokens[i].sym >= KEY_FLOAT_PARAMETERS_START && tokens[i].sym <= KEY_FLOAT_PARAMETERS_END)
-//				parse_set_string_parameter(tokens, len, i);
-//			if (tokens[i].sym >= KEY_FLOAT_PARAMETERS_START && tokens[i].sym <= KEY_FLOAT_PARAMETERS_END)
+			if (tokens[i].sym >= KEY_FLOAT_PARAMETERS_START && tokens[i].sym <= KEY_FLOAT_PARAMETERS_END)
+				parse_set_float_parameter(tokens, len, i);
+//			if (tokens[i].sym >= KEY_ARRAY_PARAMETERS_START && tokens[i].sym <= KEY_ARRAY_PARAMETERS_END)
 //				parse_set_array_parameter(tokens, len, i);
 		}
 
+	}
+}
+
+void parse_add(struct token *tokens, int len, int current)
+{
+	int i;
+
+	for (i=current+1; i<len; i++)
+	{
+		if (ignorable(tokens[i].type))
+			continue;
+
+		if (tokens[i].type == CHAR_TYPE_SYM)
+		{
+			if (tokens[i].sym >= KEY_ARRAY_PARAMETERS_START && tokens[i].sym <= KEY_ARRAY_PARAMETERS_END)
+				parse_add_array_parameter(tokens, len, i);
+		}
 	}
 }
 
@@ -192,9 +251,10 @@ int parse_command(const char *text)
 		return 0;
 	tokens = malloc(sizeof(struct token) * (count_tokens(text,len)+1));
 	len = tokenize(text, len, tokens);
+	len += 1; // tokenize returns the index of the last token, so there is 1 more than that total
 
 	// convert builtins to symbolic names
-	for (i=0; i<len+1; i++)
+	for (i=0; i<len; i++)
 	{
 		if (tokens[i].type == CHAR_TYPE_SYM)
 		{
@@ -209,7 +269,7 @@ int parse_command(const char *text)
 		}
 	}
 
-	for (i=0; i<len+1; i++)
+	for (i=0; i<len; i++)
 	{
 		if (ignorable(tokens[i].type))
 			continue;
@@ -222,9 +282,13 @@ int parse_command(const char *text)
 					printf("beer:\n");
 					beer_print_recipe();
 					break;
+				case KEY_ACTION_ADD:
+					printf("adding an ingredient\n");
+					parse_add(tokens, len, i);
+					break;
 				case KEY_ACTION_SET:
 					printf("setting a parameter\n");
-					parse_set(tokens, len+1, i);
+					parse_set(tokens, len, i);
 					break;
 				default:
 					printf("unknown action: %ld\n", tokens[i].sym);
