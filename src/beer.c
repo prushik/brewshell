@@ -29,6 +29,51 @@ void beer_set_float(int parameter, double value)
 	}
 }
 
+void beer_set_array(int array, int index, int parameter, double value)
+{
+	if (index < 0)
+	{
+		parse_error("Invalid index.");
+		return;
+	}
+
+	switch (array)
+	{
+		case KEY_PARAM_MALTS:
+			if (index < beer.malt_n)
+				switch (parameter)
+				{
+					case KEY_PARAM_QUANTITY:
+						beer.malts[index].mass = value;
+						break;
+				}
+			break;
+		case KEY_PARAM_HOPS:
+			if (index < beer.hop_n)
+				switch (parameter)
+				{
+					case KEY_PARAM_QUANTITY:
+						beer.hops[index].mass = value;
+						break;
+					case KEY_PARAM_TIME:
+						beer.hops[index].time = value;
+						break;
+				}
+			break;
+		case KEY_PARAM_YEASTS:
+			if (index < beer.yeast_n)
+				switch (parameter)
+				{
+					case KEY_PARAM_QUANTITY:
+						beer.yeasts[index].amount = value;
+						break;
+				}
+			break;
+		default:
+			return;
+	}
+}
+
 double beer_get_float(int parameter)
 {
 	

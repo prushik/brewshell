@@ -186,6 +186,97 @@ void parse_set_float_parameter(struct token *tokens, int len, int current)
 	}
 }
 
+void parse_set_array_parameter(struct token *tokens, int len, int current)
+{
+	int i, array, index = -1, parameter;
+	array = tokens[current].sym;
+
+	for (i=current+1; i<len; i++)
+	{
+		if (ignorable(tokens[i].type))
+			continue;
+
+		if (tokens[i].type == CHAR_TYPE_GRP && tokens[i].text[0] == '[')
+		{
+			for (i++; i<len; i++)
+			{
+				if (ignorable(tokens[i].type))
+					continue;
+
+				
+				if (tokens[i].type == CHAR_TYPE_NUM)
+				{
+					index = tokens[i].sym;
+					break;
+				}
+			}
+			for (i++; i<len; i++)
+			{
+				if (ignorable(tokens[i].type))
+					continue;
+
+				if (tokens[i].type == CHAR_TYPE_GRP && tokens[i].text[0] == ']')
+					break;
+				else
+				{
+					parse_error("Expecting closing bracket.");
+					return;
+				}
+			}
+			for (i++; i<len; i++)
+			{
+				if (ignorable(tokens[i].type))
+					continue;
+
+				if (tokens[i].type == CHAR_TYPE_OPR && tokens[i].sym == OP_DOT)
+					break;
+				else
+				{
+					parse_error("Must specify a parameter.");
+					return;
+				}
+			}
+			for (i++; i<len; i++)
+			{
+				if (ignorable(tokens[i].type))
+					continue;
+
+				if (tokens[i].type == CHAR_TYPE_SYM && tokens[i].sym >= KEY_PARAM_TYPE && tokens[i].sym <= KEY_PARAM_TIME)
+				{
+					parameter = tokens[i].sym;
+					break;
+				}
+				else
+				{
+					parse_error("Must specify a valid parameter.");
+					return;
+				}
+			}
+			for (i++; i<len; i++)
+			{
+				if (ignorable(tokens[i].type))
+					continue;
+
+				if (tokens[i].type == CHAR_TYPE_SPE && tokens[i].sym == PUNC_ASGN)
+				{
+					for (i++; i<len; i++)
+					{
+						if (ignorable(tokens[i].type))
+							continue;
+
+						if (tokens[i].type == CHAR_TYPE_NUM)
+						{
+							beer_set_array(array, index, parameter, tokens[i].fsym);
+							return;
+						}
+					}
+				}
+			}
+		}
+
+	}
+}
+
 void parse_add_array_parameter(struct token *tokens, int len, int current)
 {
 	int i, parameter, index;
@@ -217,8 +308,8 @@ void parse_set(struct token *tokens, int len, int current)
 				parse_set_string_parameter(tokens, len, i);
 			if (tokens[i].sym >= KEY_FLOAT_PARAMETERS_START && tokens[i].sym <= KEY_FLOAT_PARAMETERS_END)
 				parse_set_float_parameter(tokens, len, i);
-//			if (tokens[i].sym >= KEY_ARRAY_PARAMETERS_START && tokens[i].sym <= KEY_ARRAY_PARAMETERS_END)
-//				parse_set_array_parameter(tokens, len, i);
+			if (tokens[i].sym >= KEY_ARRAY_PARAMETERS_START && tokens[i].sym <= KEY_ARRAY_PARAMETERS_END)
+				parse_set_array_parameter(tokens, len, i);
 		}
 
 	}
