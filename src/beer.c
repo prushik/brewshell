@@ -2,19 +2,25 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sqlite3.h>
+
 #include "beer.h"
 #include "constants.h"
 
 #include "mainspring/host_config.h"
 #include "mainspring/lang_config.h"
 
-#define str(x) x,sizeof(x)
+#define str(x) x,(sizeof(x)-1)
+
+static int db_open = 0;
+static sqlite3 *db;
+static sqlite3_stmt *qry;
 
 static struct recipe beer = {0};
 
 void beer_init()
 {
-	
+	beer.vol = 5.0;
 }
 
 void beer_set_float(int parameter, double value)
@@ -77,6 +83,32 @@ void beer_set_array(int array, int index, int parameter, double value)
 double beer_get_float(int parameter)
 {
 	
+}
+
+void open_db()
+{
+	if (!db_open)
+	{
+		sqlite3_open(DATABASE, &db);
+		sqlite3_busy_timeout(db, 30000); // 30 seconds...
+		db_open = 1;
+	}
+}
+
+void beer_list_ingredients(int parameter)
+{
+	open_db();
+	char buffer[64];
+
+	sqlite3_prepare_v2(db, str("select name, potential, mcu, id from malts order by pts_potential desc;"), &qry, NULL);
+	while (sqlite3_step(qry) != SQLITE_DONE)
+	{
+		strcpy(buffer, sqlite3_column_text(qry, 3));
+		printf("[%s]\t", buffer);
+		strcpy(buffer, sqlite3_column_text(qry, 0));
+		printf("%s\n", buffer);
+	}
+	sqlite3_finalize(qry);
 }
 
 void beer_set_string(int parameter, const char *value, unsigned int len)
