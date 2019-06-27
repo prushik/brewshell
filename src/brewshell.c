@@ -100,13 +100,18 @@ void linenoise_complete(const char *text, linenoiseCompletions *lc)
 	return;
 }
 
-char *linenoise_hint(const char *buf, int *color, int *bold)
+char *linenoise_hint(const char *text, int *color, int *bold)
 {
-	if (!strcasecmp(buf,"hello"))
+	int i;
+
+	*color = 32;
+	*bold = 0;
+
+	for (i = 0; i < RESERVED_KEYWORDS; i++)
 	{
-		*color = 35;
-		*bold = 0;
-		return " World";
+		if (strncmp(text, reserved[i], strlen(text)) == 0) {
+			return &reserved[i][strlen(text)];
+		}
 	}
 	return 0;
 }
