@@ -100,15 +100,42 @@ void beer_list_ingredients(int parameter)
 	open_db();
 	char buffer[64];
 
-	sqlite3_prepare_v2(db, str("select name, potential, mcu, id from malts order by pts_potential desc;"), &qry, NULL);
-	while (sqlite3_step(qry) != SQLITE_DONE)
+	switch (parameter)
 	{
-		strcpy(buffer, sqlite3_column_text(qry, 3));
-		printf("[%s]\t", buffer);
-		strcpy(buffer, sqlite3_column_text(qry, 0));
-		printf("%s\n", buffer);
+		case KEY_PARAM_MALTS:
+			sqlite3_prepare_v2(db, str("select name, potential, mcu, id from malts order by pts_potential desc;"), &qry, NULL);
+			while (sqlite3_step(qry) != SQLITE_DONE)
+			{
+				strcpy(buffer, sqlite3_column_text(qry, 3));
+				printf("[%s]\t", buffer);
+				strcpy(buffer, sqlite3_column_text(qry, 0));
+				printf("%s\n", buffer);
+			}
+			sqlite3_finalize(qry);
+			break;
+		case KEY_PARAM_HOPS:
+			sqlite3_prepare_v2(db, str("select name, alpha, id from hops order by alpha desc;"), &qry, NULL);
+			while (sqlite3_step(qry) != SQLITE_DONE)
+			{
+				strcpy(buffer, sqlite3_column_text(qry, 2));
+				printf("[%s]\t", buffer);
+				strcpy(buffer, sqlite3_column_text(qry, 0));
+				printf("%s\n", buffer);
+			}
+			sqlite3_finalize(qry);
+			break;
+		case KEY_PARAM_YEASTS:
+			sqlite3_prepare_v2(db, str("select name, attenuation, id from yeasts order by attenuation desc;"), &qry, NULL);
+			while (sqlite3_step(qry) != SQLITE_DONE)
+			{
+				strcpy(buffer, sqlite3_column_text(qry, 2));
+				printf("[%s]\t", buffer);
+				strcpy(buffer, sqlite3_column_text(qry, 0));
+				printf("%s\n", buffer);
+			}
+			sqlite3_finalize(qry);
+			break;
 	}
-	sqlite3_finalize(qry);
 }
 
 void beer_set_string(int parameter, const char *value, unsigned int len)
@@ -147,11 +174,77 @@ int beer_add_array(int parameter)
 			break;
 		case KEY_PARAM_YEASTS:
 			beer.yeast_n += 1;
-			beer.yeasts = realloc(beer.hops, sizeof(struct yeast)*beer.yeast_n);
+			beer.yeasts = realloc(beer.yeasts, sizeof(struct yeast)*beer.yeast_n);
 			return beer.yeast_n;
 			break;
 		default:
 			return 0;
+	}
+}
+
+void beer_set_malt_by_id(int index, long int id)
+{
+	open_db();
+
+	sqlite3_prepare_v2(db, str("select name, potential, pts_potential, mcu from malts where id = ? limit 1;"), &qry, NULL);
+	sqlite3_bind_int(qry, 1, id);
+
+	while (sqlite3_step(qry) != SQLITE_DONE)
+	{
+		strcpy(beer.malts[index].name, sqlite3_column_text(qry, 0));
+		beer.malts[index].potential = sqlite3_column_double(qry, 1);
+		beer.malts[index].pts_potential = sqlite3_column_double(qry, 2);
+		beer.malts[index].mcu = sqlite3_column_double(qry, 3);
+	}
+	sqlite3_finalize(qry);
+}
+
+void beer_set_hop_by_id(int index, long int id)
+{
+	open_db();
+
+	sqlite3_prepare_v2(db, str("select name, alpha from hops where id = ? limit 1;"), &qry, NULL);
+	sqlite3_bind_int(qry, 1, id);
+
+	while (sqlite3_step(qry) != SQLITE_DONE)
+	{
+		strcpy(beer.hops[index].name, sqlite3_column_text(qry, 0));
+		beer.hops[index].alpha = sqlite3_column_double(qry, 1);
+	}
+	sqlite3_finalize(qry);
+}
+
+void beer_set_yeast_by_id(int index, long int id)
+{
+	open_db();
+
+	sqlite3_prepare_v2(db, str("select name, attenuation, flocculation from yeasts where id = ? limit 1;"), &qry, NULL);
+	sqlite3_bind_int(qry, 1, id);
+
+	while (sqlite3_step(qry) != SQLITE_DONE)
+	{
+		strcpy(beer.yeasts[index].name, sqlite3_column_text(qry, 0));
+		beer.yeasts[index].attenuation = sqlite3_column_double(qry, 1);
+		beer.yeasts[index].flocculation = sqlite3_column_int(qry, 1);
+	}
+	sqlite3_finalize(qry);
+}
+
+void beer_set_ingredient_by_id(int parameter, int index, long int id)
+{
+	switch (parameter)
+	{
+		case KEY_PARAM_MALTS:
+			beer_set_malt_by_id(index,id);
+			break;
+		case KEY_PARAM_HOPS:
+			beer_set_hop_by_id(index,id);
+			break;
+		case KEY_PARAM_YEASTS:
+			beer_set_yeast_by_id(index,id);
+			break;
+		default:
+			return;
 	}
 }
 
@@ -314,8 +407,6 @@ void beer_print_recipe()
 	write(1, buffer, buf_len);
 	write(1, str("\n"));
 
-
-	write(1, str("ingredients: \n"));
 	write(1, str("	malts: \n"));
 	for (i=0; i < beer.malt_n; i++)
 	{
@@ -336,7 +427,7 @@ void beer_print_recipe()
 		write(1, beer.hops[i].name, strlen(beer.hops[i].name));
 		write(1, str("\"\n"));
 
-		write(1, str("			\"weight\" : "));
+		write(1, str("			weight : "));
 		sprintf(buffer, "%.2lf%n", beer.hops[i].mass, &buf_len);
 		write(1, buffer, buf_len);
 		write(1, str("\t"));

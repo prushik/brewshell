@@ -79,9 +79,9 @@ COMMIT;
 
 BEGIN TRANSACTION;
 
-insert into ingredient_types values('malt',0);
-insert into ingredient_types values('hops',1);
-insert into ingredient_types values('yeast',2);
+--insert into ingredient_types values('malt',0);
+--insert into ingredient_types values('hops',1);
+--insert into ingredient_types values('yeast',2);
 
 insert into malts values('pilsner malt', 1.034, 34, 1, 0);
 insert into malts values('2-row pale malt', 1.037, 37, 1.8, 1);

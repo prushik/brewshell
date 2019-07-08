@@ -50,4 +50,4 @@ struct recipe
 #define HOP_TYPE_PELLET   0
 #define HOP_TYPE_WHOLE    1
 
-#define DATABASE          "/var/db/beer.sqlite"
+#define DATABASE          "/var/db/brewshell.sqlite"

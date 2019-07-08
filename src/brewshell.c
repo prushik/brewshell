@@ -291,7 +291,10 @@ void parse_add_array_parameter(struct token *tokens, int len, int current)
 		if (ignorable(tokens[i].type))
 			continue;
 
-		
+		if (tokens[i].type == CHAR_TYPE_NUM)
+		{
+			beer_set_ingredient_by_id(parameter, index-1, tokens[i].sym);
+		}
 	}
 }
 
@@ -312,6 +315,29 @@ void parse_set(struct token *tokens, int len, int current)
 				parse_set_float_parameter(tokens, len, i);
 			if (tokens[i].sym >= KEY_ARRAY_PARAMETERS_START && tokens[i].sym <= KEY_ARRAY_PARAMETERS_END)
 				parse_set_array_parameter(tokens, len, i);
+		}
+
+	}
+}
+
+void parse_list(struct token *tokens, int len, int current)
+{
+	int i;
+
+	for (i=current+1; i<len; i++)
+	{
+		if (ignorable(tokens[i].type))
+			continue;
+
+		if (tokens[i].type == CHAR_TYPE_SYM)
+		{
+			if (tokens[i].sym >= KEY_ARRAY_PARAMETERS_START && tokens[i].sym <= KEY_ARRAY_PARAMETERS_END)
+				beer_list_ingredients(tokens[i].sym);
+			else
+			{
+				parse_error("ingredient type not found in database");
+				return;
+			}
 		}
 
 	}
@@ -372,18 +398,15 @@ int parse_command(const char *text)
 			switch (tokens[i].sym)
 			{
 				case KEY_ACTION_LIST:
-					beer_list_ingredients(KEY_PARAM_MALTS);
+					parse_list(tokens, len, i);
 					break;
 				case KEY_ACTION_PRINT:
-					printf("beer:\n");
 					beer_print_recipe();
 					break;
 				case KEY_ACTION_ADD:
-					printf("adding an ingredient\n");
 					parse_add(tokens, len, i);
 					break;
 				case KEY_ACTION_SET:
-					printf("setting a parameter\n");
 					parse_set(tokens, len, i);
 					break;
 				default:
