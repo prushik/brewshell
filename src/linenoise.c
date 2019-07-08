@@ -122,7 +122,7 @@
 static char *unsupported_term[] = {"dumb","cons25","emacs",NULL};
 static linenoiseCompletionCallback *completionCallback = NULL;
 static linenoiseHintsCallback *hintsCallback = NULL;
-static linenoiseFreeHintsCallback *freeHintsCallback = NULL;
+//static linenoiseFreeHintsCallback *freeHintsCallback = NULL;
 
 static struct termios orig_termios; /* In order to restore at exit.*/
 static int rawmode = 0; /* For atexit() function to check if restore is needed*/
@@ -418,9 +418,9 @@ void linenoiseSetHintsCallback(linenoiseHintsCallback *fn) {
 
 /* Register a function to free the hints returned by the hints callback
  * registered with linenoiseSetHintsCallback(). */
-void linenoiseSetFreeHintsCallback(linenoiseFreeHintsCallback *fn) {
-	freeHintsCallback = fn;
-}
+//void linenoiseSetFreeHintsCallback(linenoiseFreeHintsCallback *fn) {
+//	freeHintsCallback = fn;
+//}
 
 /* This function is used by the callback function registered by the user
  * in order to add completion options given the input string when the
@@ -477,7 +477,7 @@ void refreshShowHints(struct abuf *ab, struct linenoiseState *l, int plen) {
 	char seq[64];
 	if (hintsCallback && plen+l->len < l->cols) {
 		int color = -1, bold = 0;
-		char *hint = hintsCallback(l->buf,&color,&bold);
+		const char *hint = hintsCallback(l->buf,&color,&bold);
 		if (hint) {
 			int hintlen = strlen(hint);
 			int hintmaxlen = l->cols-(plen+l->len);
@@ -492,7 +492,7 @@ void refreshShowHints(struct abuf *ab, struct linenoiseState *l, int plen) {
 			if (color != -1 || bold != 0)
 				abAppend(ab,"\033[0m",4);
 			/* Call the function to free the hint returned. */
-			if (freeHintsCallback) freeHintsCallback(hint);
+//			if (freeHintsCallback) freeHintsCallback(hint);
 		}
 	}
 }

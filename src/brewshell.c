@@ -55,7 +55,7 @@ void recipe_update(unsigned long int beer_id, const char* name, double size);
 #define ACTION_UPDATEBEER	0x10
 
 void linenoise_complete(const char *text, linenoiseCompletions *lc);
-char *linenoise_hint(const char *buf, int *color, int *bold);
+const char *linenoise_hint(const char *buf, int *color, int *bold);
 
 int main(int argc, char **argv)
 {
@@ -100,7 +100,7 @@ void linenoise_complete(const char *text, linenoiseCompletions *lc)
 	return;
 }
 
-char *linenoise_hint(const char *text, int *color, int *bold)
+const char *linenoise_hint(const char *text, int *color, int *bold)
 {
 	int i;
 
